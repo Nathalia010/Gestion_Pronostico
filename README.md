@@ -1,4 +1,4 @@
-# MPS | Supply Chain & Sales Analytics
+# MPS | Análisis de la cadena de suministro y de ventas
 
 Proyecto de portafolio de análisis de ventas, productos, inventario e importaciones de una empresa mayorista de tecnología. **Todos los datos son ficticios y no representan información real de MPS Colombia.**
 
