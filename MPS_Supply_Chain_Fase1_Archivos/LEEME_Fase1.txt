@@ -1,0 +1,13 @@
+MPS Supply Chain & Sales Analytics — Fase 1
+Datos 100% ficticios, no representan información de MPS.
+Periodo: 01-ene-2025 a 31-oct-2026 | Moneda: COP
+150 referencias | 20 proveedores | 15.000 ventas | 3.600 cortes de inventario | 500 órdenes de importación.
+
+PASOS:
+1. Abre el Excel y revisa LEEME y las demás hojas.
+2. En SQL Server Management Studio (SSMS), conéctate a tu instancia.
+3. Abre y ejecuta MPS_SupplyChain_Crear_Base_SQLServer.sql.
+4. Importa las hojas del Excel usando el asistente de importación de SSMS. Orden: Productos, Proveedores, Ventas, Inventario, Importaciones, Calendario.
+5. Comprueba los conteos con las consultas del script.
+6. Importante: Inventario contiene snapshots mensuales; para reportar stock usa el corte seleccionado, nunca sumes el stock de todos los meses.
+Modelo Power BI: Productos 1:* Ventas, Inventario e Importaciones; Proveedores 1:* Importaciones; Calendario 1:* Ventas por FechaVenta e Inventario por FechaCorte. Para importaciones empezaremos con FechaPedido y luego veremos fechas alternativas.

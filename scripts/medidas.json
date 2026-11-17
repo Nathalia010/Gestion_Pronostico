@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Ventas COP",
+    "expression": "SUM(Ventas[ValorVentaCOP])",
+    "format": "\"$\" #,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Unidades vendidas",
+    "expression": "SUM(Ventas[Cantidad])",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Transacciones",
+    "expression": "COUNTROWS(Ventas)",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Referencias activas",
+    "expression": "CALCULATE(DISTINCTCOUNT(Productos[SKU]), Productos[EstadoReferencia] = \"Activa\")",
+    "format": "#,0",
+    "table": "Productos"
+  },
+  {
+    "name": "Referencias con venta",
+    "expression": "DISTINCTCOUNT(Ventas[SKU])",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Ticket promedio COP",
+    "expression": "DIVIDE([Ventas COP], [Transacciones])",
+    "format": "\"$\" #,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Corte inventario",
+    "expression": "VAR Limite = MAX(Calendario[Fecha]) RETURN CALCULATE(MAX(Inventario[FechaCorte]), REMOVEFILTERS(Calendario), Inventario[FechaCorte] <= Limite)",
+    "format": "dd mmm yyyy",
+    "table": "Inventario"
+  },
+  {
+    "name": "Stock unidades",
+    "expression": "VAR Corte = [Corte inventario] RETURN IF(NOT ISBLANK(Corte), CALCULATE(SUM(Inventario[StockUnidades]), REMOVEFILTERS(Calendario), Inventario[FechaCorte] = Corte))",
+    "format": "#,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Inventario COP",
+    "expression": "VAR Corte = [Corte inventario] RETURN IF(NOT ISBLANK(Corte), CALCULATE(SUM(Inventario[CostoInventarioCOP]), REMOVEFILTERS(Calendario), Inventario[FechaCorte] = Corte))",
+    "format": "\"$\" #,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Stock disponible",
+    "expression": "VAR Corte = [Corte inventario] RETURN IF(NOT ISBLANK(Corte), CALCULATE(SUM(Inventario[StockUnidades]) - SUM(Inventario[StockReservado]), REMOVEFILTERS(Calendario), Inventario[FechaCorte] = Corte))",
+    "format": "#,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Demanda mensual reciente",
+    "expression": "VAR Fin = EOMONTH(CONVERT(CALCULATE(MAX(Ventas[FechaVenta]), REMOVEFILTERS()), DATETIME), 0) VAR Inicio = INT(EOMONTH(Fin, -3)) + 1 RETURN DIVIDE(CALCULATE([Unidades vendidas], REMOVEFILTERS(Calendario), FILTER(ALL(Ventas[FechaVenta]), Ventas[FechaVenta] >= Inicio && Ventas[FechaVenta] <= INT(Fin))), 3)",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Cobertura dias",
+    "expression": "DIVIDE([Stock disponible], DIVIDE([Demanda mensual reciente], 30))",
+    "format": "0.0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Referencias sin stock",
+    "expression": "COUNTROWS(FILTER(VALUES(Productos[SKU]), NOT ISBLANK([Stock disponible]) && [Stock disponible] <= 0))",
+    "format": "#,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Referencias en riesgo",
+    "expression": "COUNTROWS(FILTER(VALUES(Productos[SKU]), NOT ISBLANK([Cobertura dias]) && [Cobertura dias] < 30))",
+    "format": "#,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Ordenes importacion",
+    "expression": "COUNTROWS(Importaciones)",
+    "format": "#,0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Unidades ordenadas",
+    "expression": "SUM(Importaciones[CantidadOrdenada])",
+    "format": "#,0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Costo importacion COP",
+    "expression": "SUMX(Importaciones, Importaciones[CantidadOrdenada] * Importaciones[CostoUnitarioImportacionCOP])",
+    "format": "\"$\" #,0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Ordenes recibidas",
+    "expression": "COUNTROWS(FILTER(Importaciones, NOT ISBLANK(Importaciones[FechaRecepcion])))",
+    "format": "#,0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Ordenes pendientes",
+    "expression": "[Ordenes importacion] - [Ordenes recibidas]",
+    "format": "#,0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Entrega promedio dias",
+    "expression": "AVERAGEX(FILTER(Importaciones, NOT ISBLANK(Importaciones[FechaRecepcion])), Importaciones[FechaRecepcion] - Importaciones[FechaPedido])",
+    "format": "0.0",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Entregas a tiempo",
+    "expression": "DIVIDE(COUNTROWS(FILTER(Importaciones, NOT ISBLANK(Importaciones[FechaRecepcion]) && Importaciones[FechaRecepcion] <= Importaciones[FechaEntregaEsperada])), [Ordenes recibidas])",
+    "format": "0.0%",
+    "table": "Importaciones"
+  },
+  {
+    "name": "Media movil 3 meses",
+    "expression": "VAR Fin = INT(EOMONTH(MAX(Calendario[AñoMes]), -1)) VAR Inicio = INT(EOMONTH(MAX(Calendario[AñoMes]), -4)) + 1 VAR InicioDatos = CALCULATE(MIN(Ventas[FechaVenta]), REMOVEFILTERS()) RETURN IF(Inicio >= InicioDatos, DIVIDE(CALCULATE([Unidades vendidas], REMOVEFILTERS(Calendario), FILTER(ALL(Ventas[FechaVenta]), Ventas[FechaVenta] >= Inicio && Ventas[FechaVenta] <= Fin)), 3))",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Proyeccion proximo mes",
+    "expression": "[Demanda mensual reciente]",
+    "format": "#,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Mes proyectado",
+    "expression": "FORMAT(EOMONTH(CONVERT(CALCULATE(MAX(Ventas[FechaVenta]), REMOVEFILTERS()), DATETIME), 0) + 1, \"mmm yyyy\")",
+    "format": "",
+    "table": "Ventas"
+  },
+  {
+    "name": "MAPE prueba 3 meses",
+    "expression": "VAR Ultimo = EOMONTH(CONVERT(CALCULATE(MAX(Ventas[FechaVenta]), REMOVEFILTERS()), DATETIME), 0) RETURN AVERAGEX(GENERATESERIES(0, 2), VAR Fin = INT(EOMONTH(Ultimo, -[Value])) VAR Inicio = INT(EOMONTH(Ultimo, -[Value]-1)) + 1 VAR BaseInicio = INT(EOMONTH(Ultimo, -[Value]-4)) + 1 VAR Real = CALCULATE([Unidades vendidas], REMOVEFILTERS(Calendario), FILTER(ALL(Ventas[FechaVenta]), Ventas[FechaVenta] >= Inicio && Ventas[FechaVenta] <= Fin)) VAR Pred = DIVIDE(CALCULATE([Unidades vendidas], REMOVEFILTERS(Calendario), FILTER(ALL(Ventas[FechaVenta]), Ventas[FechaVenta] >= BaseInicio && Ventas[FechaVenta] < Inicio)), 3) RETURN IF(Real > 0, DIVIDE(ABS(Real - Pred), Real)))",
+    "format": "0.0%",
+    "table": "Ventas"
+  },
+  {
+    "name": "Costo venta estimado",
+    "expression": "SUMX(Ventas, Ventas[Cantidad] * RELATED(Productos[CostoUnitarioCOP]))",
+    "format": "\"$\" #,0",
+    "table": "Ventas"
+  },
+  {
+    "name": "Inventario medio COP",
+    "expression": "AVERAGEX(VALUES(Inventario[FechaCorte]), CALCULATE(SUM(Inventario[CostoInventarioCOP])))",
+    "format": "\"$\" #,0",
+    "table": "Inventario"
+  },
+  {
+    "name": "Rotacion estimada",
+    "expression": "DIVIDE([Costo venta estimado], [Inventario medio COP])",
+    "format": "0.00\" x\"",
+    "table": "Ventas"
+  },
+  {
+    "name": "Nivel de servicio",
+    "expression": "\"Sin datos de pedidos\"",
+    "format": "",
+    "table": "Ventas"
+  },
+  {
+    "name": "Disponibilidad referencias",
+    "expression": "VAR Total = COUNTROWS(FILTER(VALUES(Productos[SKU]), NOT ISBLANK([Stock disponible]))) RETURN DIVIDE(Total - [Referencias sin stock], Total)",
+    "format": "0.0%",
+    "table": "Inventario"
+  }
+]
