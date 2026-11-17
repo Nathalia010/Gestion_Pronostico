@@ -10,6 +10,8 @@ Abre **MPS Supply Chain - Informe.pbix** en Power BI Desktop. El archivo contien
 4. **Pronósticos:** histórico mensual, media móvil, proyección de los próximos tres meses y error retrospectivo.
 5. **Indicadores de gestión:** rotación estimada, disponibilidad, puntualidad y MAPE.
 
+Las cinco páginas incluyen un **diseño para móvil** de 324 px de ancho: filtros superiores, tarjetas en dos columnas y gráficos a ancho completo, con desplazamiento vertical. Las tablas de detalle conservan sus columnas y permiten desplazamiento horizontal. Puedes revisarlo con el icono de teléfono de Power BI Desktop o en **Ver > Diseño para móviles**.
+
 ## Criterios de cálculo
 
 - Período histórico: enero de 2025 a octubre de 2026. Moneda: COP.
@@ -33,6 +35,7 @@ Abre **MPS Supply Chain - Informe.pbix** en Power BI Desktop. El archivo contien
 - `scripts/medidas.json`: definiciones de las 30 medidas DAX.
 - `scripts/crear_informe.py`: genera las medidas y empaqueta las cinco páginas PBIR sobre el modelo existente.
 - `scripts/modelo_powerbi.ps1`: consulta el modelo local o aplica medidas y relaciones mediante la biblioteca oficial de Microsoft.
+- `scripts/acomodar_movil.py`: ajusta las posiciones y el formato exclusivo para móvil sin cambiar los visuales de escritorio.
 
 El modelo conserva sus conexiones originales. Para actualizar desde otra ubicación, ajusta el origen en **Transformar datos > Configuración de origen de datos** a la copia local del Excel de este repositorio.
 

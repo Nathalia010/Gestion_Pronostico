@@ -132,6 +132,8 @@ def build():
     text('NIVEL DE SERVICIO\nPendiente de datos de pedidos.\nSe necesitan cantidades solicitadas y atendidas.\nLa disponibilidad de stock se muestra por separado.',884,278,372,268,16,'#16324F','#E1F3F0')
     text('CÓMO INTERPRETAR\nRotación: mayor valor implica más movimiento del inventario durante el período.\nDisponibilidad: proporción de referencias con stock disponible mayor a cero, al corte.\nPuntualidad: recepciones en fecha o antes / órdenes recibidas. MAPE: menor error es mejor.',24,566,1232,166,14,'#16324F','#FFFFFF')
     FILES['Report/definition/pages/pages.json']={'$schema':schema+'pagesMetadata/1.1.0/schema.json','pageOrder':order,'activePageName':order[0]}
+    from acomodar_movil import generate_mobile_files
+    FILES.update(generate_mobile_files(FILES))
     return FILES
 
 if __name__ == '__main__':
